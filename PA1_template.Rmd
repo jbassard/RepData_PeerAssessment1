@@ -40,7 +40,6 @@ activityData <- read.csv("activity.csv")
 ```
 ### Transforming the data, changing the date format using lubridate
 ```{r}
-Sys.setlocale("LC_TIME","English United States")
 activityData$date <- ymd(activityData$date)
 ```
 ## What is mean total number of steps taken per day?
