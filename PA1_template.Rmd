@@ -14,13 +14,10 @@ if (!require("lubridate")) {
 	install.packages("lubridate")}
 if (!require("ggplot2")) {
 	install.packages("ggplot2")}
-if (!require("dplyr")) {
-	install.packages("dplyr")}
 
 library(knitr)
 library(lubridate)
 library(ggplot2)
-library(dplyr)
 ```
 ### Setting the default of echo to be True throughout the whole report
 ```{r}
