@@ -4,7 +4,7 @@ output:
   html_document:
     keep_md: true
 ---
-About This is the first project assignment for the Reproducible Research course in Coursera's Data Science specialization track. The purpose of the project was to answer a series of questions using data collected from an activity monitoring devices.
+This is the first project assignment for the Reproducible Research course in Coursera's Data Science specialization track. The purpose of the project was to answer a series of questions using data collected from an activity monitoring devices.
 
 ### Checking for required packages and install them if necessary, then load them
 ```{r}
