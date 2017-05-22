@@ -24,7 +24,7 @@ library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Loading and preprocessing the data
-###Checking if files exist in the folder "RepDataAsignment1" in default working directory, otherwise create the folder, download and unzip the dataset in that folder
+### Checking if files exist in the folder "RepDataAsignment1" in default working directory, otherwise create the folder, download and unzip the dataset in that folder
 ```{r}
 if(!file.exists("./RepDataAssignment1")) {
 	dir.create("./RepDataAssignment1")}
@@ -34,12 +34,12 @@ if(!file.exists("./RepDataAssignment1/repdata%2Fdata%2Factivity.zip")) {
 if(!file.exists("RepDataAssignment1/activity.csv")) {
 	unzip(zipfile="./RepDataAssignment1/repdata%2Fdata%2Factivity.zip", exdir="./RepDataAssignment1")}
 ```
-###Setting working directory to "RepDataAsignment1" directory
+### Setting working directory to "RepDataAsignment1" directory
 ```{r}
 wd <- getwd() ## store current directory path to reset it at the end of the script
 setwd("./RepDataAssignment1")
 ```
-###Loading the data
+### Loading the data
 ```{r}
 activityData <- read.csv("activity.csv")
 ```
@@ -51,13 +51,13 @@ activityData$date <- ymd(activityData$date)
 ```
 
 ## What is mean total number of steps taken per day?
-###Summing steps by day
+### Summing steps by day
 ```{r}
 stepsbyday <- aggregate(steps ~ date, activityData, sum)
 ```
 The total number of steps taken per day is `r stepsbyday`.
 
-###Creating an Histogram, and calculate mean and median.
+### Creating an Histogram, and calculate mean and median.
 ```{r}
 ggplot(stepsbyday, aes(x = steps)) +
   geom_histogram(fill = "blue", binwidth = 500) +
@@ -68,31 +68,31 @@ stepmedian <- median(stepsbyday$steps, na.rm = TRUE)
 The mean is `r stepmean` and the median is `r stepmedian`
 
 ## What is the average daily activity pattern?
-###Calculating average steps for each interval for all days
+### Calculating average steps for each interval for all days
 ```{r}
 stepsbyinterval <- aggregate(steps ~ interval, activityData, mean, nar.rm = TRUE)
 ```
-###Plotting the Average Number of Steps per Day by Interval.
+### Plotting the Average Number of Steps per Day by Interval.
 ```{r}
 ggplot(stepsbyinterval, aes(x=interval, y=steps)) +
     geom_line(color = "firebrick") +
     labs(title = "Daily activity pattern", x = "5-minutes interval", y = "Average number of steps taken")
 ```
-###Finding interval with highest average steps
+### Finding interval with highest average steps
 ```{r}
 interval <- stepsbyinterval$interval[which.max(stepsbyinterval$steps)]
 ```
 The interval `r interval` has, on average, the highest count of steps.
 
 
-##Imputing missing values
-###Total number of missing values
+## Imputing missing values
+### Total number of missing values
 ```{r}
 missing <- sum(is.na(activityData$steps))
 ```
 There are `r missing` missing values.
 
-###Creating a new dataset (imputted) that is equal to the original dataset but with the missing data filled in with the mean for the 5-minute interval
+### Creating a new dataset (imputted) that is equal to the original dataset but with the missing data filled in with the mean for the 5-minute interval
 ```{r}
 imputted <- activityData
 for (i in stepsbyinterval$interval) {
@@ -100,7 +100,7 @@ for (i in stepsbyinterval$interval) {
         stepsbyinterval$steps[stepsbyinterval$interval == i]
 }
 ```
-###Making a histogram of the total number of steps taken each day and calculate the mean and median
+### Making a histogram of the total number of steps taken each day and calculate the mean and median
 ```{r}
 stepsbyday_imputted <- aggregate(steps ~ date, data = imputted, sum)
 ggplot(stepsbyday_imputted, aes(x = steps)) +
@@ -112,7 +112,7 @@ newstepmedian <- median(stepsbyday_imputted$steps)
 ```
 The mean is `r newstepmean` and the median is `r newstepmedian`
 
-###Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+### Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 - The mean is the same as the mean from the first part of the assignment, but the median is not.
 
@@ -127,7 +127,7 @@ newimputted$dayofweek<- as.factor(c("weekend", "weekday"))
 newimputted[newimputted$weekday == "dimanche" | newimputted$weekday == "samedi" ,5]<- factor("weekend") ##my system is in French, for a reason I do not understand, even if I force the local time system to be English, I have to search for the week days in French.
 newimputted[!(newimputted$weekday == "dimanche" | newimputted$weekday == "samedi"),5 ]<- factor("weekday")
 ```
-###Making a panel plot containing a time series plot
+### Making a panel plot containing a time series plot
 ```{r}
 newinterval <- aggregate(steps ~ interval + dayofweek, newimputted, mean)
 
@@ -136,7 +136,7 @@ graph <- ggplot(newinterval, aes(x=interval, y=steps, color = dayofweek)) +
   facet_wrap(~dayofweek, ncol = 1, nrow=2)
 print(graph)
 ```
-###Restoring default working directory
+### Restoring default working directory
 ```{r}
 setwd(paste(wd))
 ```
