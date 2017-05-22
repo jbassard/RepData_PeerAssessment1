@@ -34,22 +34,15 @@ if(!file.exists("./RepDataAssignment1/repdata%2Fdata%2Factivity.zip")) {
 if(!file.exists("RepDataAssignment1/activity.csv")) {
 	unzip(zipfile="./RepDataAssignment1/repdata%2Fdata%2Factivity.zip", exdir="./RepDataAssignment1")}
 ```
-### Setting working directory to "RepDataAsignment1" directory
-```{r}
-wd <- getwd() ## store current directory path to reset it at the end of the script
-setwd("./RepDataAssignment1")
-```
 ### Loading the data
 ```{r}
 activityData <- read.csv("activity.csv")
 ```
-
 ### Transforming the data, changing the date format using lubridate
 ```{r}
 Sys.setlocale("LC_TIME","English United States")
 activityData$date <- ymd(activityData$date)
 ```
-
 ## What is mean total number of steps taken per day?
 ### Summing steps by day
 ```{r}
@@ -124,7 +117,7 @@ The mean is `r newstepmean` and the median is `r newstepmedian`
 newimputted <- imputted
 newimputted$weekday<-weekdays(newimputted$date)
 newimputted$dayofweek<- as.factor(c("weekend", "weekday"))
-newimputted[newimputted$weekday == "dimanche" | newimputted$weekday == "samedi" ,5]<- factor("weekend") ##my system is in French, for a reason I do not understand, even if I force the local time system to be English, I have to search for the week days in French.
+newimputted[newimputted$weekday == "dimanche" | newimputted$weekday == "samedi" ,5]<- factor("weekend") ##my system is in French, for a reason I do not understand, even if I force the local time system to be English, I have to search for the days' name in French.
 newimputted[!(newimputted$weekday == "dimanche" | newimputted$weekday == "samedi"),5 ]<- factor("weekday")
 ```
 ### Making a panel plot containing a time series plot
@@ -135,8 +128,4 @@ graph <- ggplot(newinterval, aes(x=interval, y=steps, color = dayofweek)) +
   geom_line() +
   facet_wrap(~dayofweek, ncol = 1, nrow=2)
 print(graph)
-```
-### Restoring default working directory
-```{r}
-setwd(paste(wd))
 ```
