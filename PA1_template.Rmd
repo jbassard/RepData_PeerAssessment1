@@ -44,7 +44,7 @@ setwd("./RepDataAssignment1")
 activityData <- read.csv("activity.csv")
 ```
 
-###Transforming the data, changing the date format using lubridate
+### Transforming the data, changing the date format using lubridate
 ```{r}
 Sys.setlocale("LC_TIME","English United States")
 activityData$date <- ymd(activityData$date)
