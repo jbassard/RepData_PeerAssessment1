@@ -1,25 +1,145 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
+title: "Reproducible Research: Assignment 1"
 output: 
   html_document:
     keep_md: true
 ---
+About This is the first project assignment for the Reproducible Research course in Coursera's Data Science specialization track. The purpose of the project was to answer a series of questions using data collected from an activity monitoring devices.
 
+### Checking for required packages and install them if necessary, then load them
+```{r}
+if (!require("knitr")) {
+	install.packages("knitr")}
+if (!require("lubridate")) {
+	install.packages("lubridate")}
+if (!require("ggplot2")) {
+	install.packages("ggplot2")}
+if (!require("dplyr")) {
+	install.packages("dplyr")}
 
+library(knitr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+### Setting the default of echo to be True throughout the whole report
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+```
 ## Loading and preprocessing the data
+###Checking if files exist in the folder "RepDataAsignment1" in default working directory, otherwise create the folder, download and unzip the dataset in that folder
+```{r}
+if(!file.exists("./RepDataAssignment1")) {
+	dir.create("./RepDataAssignment1")}
+if(!file.exists("./RepDataAssignment1/repdata%2Fdata%2Factivity.zip")) {
+	fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+	download.file(fileUrl, destfile="RepDataAssignment1/repdata%2Fdata%2Factivity.zip")}
+if(!file.exists("RepDataAssignment1/activity.csv")) {
+	unzip(zipfile="./RepDataAssignment1/repdata%2Fdata%2Factivity.zip", exdir="./RepDataAssignment1")}
+```
+###Setting working directory to "RepDataAsignment1" directory
+```{r}
+wd <- getwd() ## store current directory path to reset it at the end of the script
+setwd("./RepDataAssignment1")
+```
+###Loading the data
+```{r}
+activityData <- read.csv("activity.csv")
+```
 
-
+###Transforming the data, changing the date format using lubridate
+```{r}
+Sys.setlocale("LC_TIME","English United States")
+activityData$date <- ymd(activityData$date)
+```
 
 ## What is mean total number of steps taken per day?
+###Summing steps by day
+```{r}
+stepsbyday <- aggregate(steps ~ date, activityData, sum)
+```
+The total number of steps taken per day is `r stepsbyday`.
 
-
+###Creating an Histogram, and calculate mean and median.
+```{r}
+ggplot(stepsbyday, aes(x = steps)) +
+  geom_histogram(fill = "blue", binwidth = 500) +
+  labs(title = "Histogram of Steps per Day", x = "Steps per day", y = "Frequency")
+stepmean <- mean(stepsbyday$steps, na.rm = TRUE)
+stepmedian <- median(stepsbyday$steps, na.rm = TRUE)
+```
+The mean is `r stepmean` and the median is `r stepmedian`
 
 ## What is the average daily activity pattern?
+###Calculating average steps for each interval for all days
+```{r}
+stepsbyinterval <- aggregate(steps ~ interval, activityData, mean, nar.rm = TRUE)
+```
+###Plotting the Average Number of Steps per Day by Interval.
+```{r}
+ggplot(stepsbyinterval, aes(x=interval, y=steps)) +
+    geom_line(color = "firebrick") +
+    labs(title = "Daily activity pattern", x = "5-minutes interval", y = "Average number of steps taken")
+```
+###Finding interval with highest average steps
+```{r}
+interval <- stepsbyinterval$interval[which.max(stepsbyinterval$steps)]
+```
+The interval `r interval` has, on average, the highest count of steps.
 
 
+##Imputing missing values
+###Total number of missing values
+```{r}
+missing <- sum(is.na(activityData$steps))
+```
+There are `r missing` missing values.
 
-## Imputing missing values
+###Creating a new dataset (imputted) that is equal to the original dataset but with the missing data filled in with the mean for the 5-minute interval
+```{r}
+imputted <- activityData
+for (i in stepsbyinterval$interval) {
+    imputted[imputted$interval == i & is.na(imputted$steps), ]$steps <- 
+        stepsbyinterval$steps[stepsbyinterval$interval == i]
+}
+```
+###Making a histogram of the total number of steps taken each day and calculate the mean and median
+```{r}
+stepsbyday_imputted <- aggregate(steps ~ date, data = imputted, sum)
+ggplot(stepsbyday_imputted, aes(x = steps)) +
+  geom_histogram(fill = "red", binwidth = 500) +
+  labs(title = "Total Number of Steps Taken Each Day (Imputed)", x = "Steps per day", y = "Frequency")
 
+newstepmean <- mean(stepsbyday_imputted$steps)
+newstepmedian <- median(stepsbyday_imputted$steps)
+```
+The mean is `r newstepmean` and the median is `r newstepmedian`
 
+###Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+- The mean is the same as the mean from the first part of the assignment, but the median is not.
+
+- The impact of imputing missing data with the average number of steps in the same 5-min interval is that both the mean and the median are equal to the same value: 10766.19.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+###Creating a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day
+```{r}
+newimputted <- imputted
+newimputted$weekday<-weekdays(newimputted$date)
+newimputted$dayofweek<- as.factor(c("weekend", "weekday"))
+newimputted[newimputted$weekday == "dimanche" | newimputted$weekday == "samedi" ,5]<- factor("weekend") ##my system is in French, for a reason I do not understand, even if I force the local time system to be English, I have to search for the week days in French.
+newimputted[!(newimputted$weekday == "dimanche" | newimputted$weekday == "samedi"),5 ]<- factor("weekday")
+```
+###Making a panel plot containing a time series plot
+```{r}
+newinterval <- aggregate(steps ~ interval + dayofweek, newimputted, mean)
+
+graph <- ggplot(newinterval, aes(x=interval, y=steps, color = dayofweek)) +
+  geom_line() +
+  facet_wrap(~dayofweek, ncol = 1, nrow=2)
+print(graph)
+```
+###Restoring default working directory
+```{r}
+setwd(paste(wd))
+```
